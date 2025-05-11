@@ -1,0 +1,105 @@
+"use client"
+
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { PlusCircle } from "lucide-react";
+import { Expense } from "@/types/expense";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+interface ExpensesDialogProps {
+  isAddDialogOpen: boolean;
+  setIsAddDialogOpen: (open: boolean) => void;
+  newExpense: Omit<Expense, "id" | "selected">;
+  setNewExpense: (expense: Omit<Expense, "id" | "selected">) => void;
+  handleAddExpense: () => void;
+}
+export default function ExpensesDialog({ isAddDialogOpen, setIsAddDialogOpen, newExpense, setNewExpense, handleAddExpense }: ExpensesDialogProps) {
+  const { data: catFact, isLoading, refetch } = useQuery({
+    queryKey: ["catFact"],
+    queryFn: () => fetch("https://catfact.ninja/fact?max_length=100").then((res) => res.json()),
+  })
+
+  useEffect(() => {
+    refetch()
+  }, [isAddDialogOpen, refetch])
+
+  return (
+    <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+      <DialogTrigger asChild>
+        <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+          <PlusCircle className="mr-2 h-4 w-4" /> Add Expense
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-semibold text-purple-700">Add New Expense</DialogTitle>
+        </DialogHeader>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+          <div className="space-y-6">
+            <div className="grid gap-2">
+              <Label htmlFor="item" className="text-base font-medium">
+                Item:
+              </Label>
+              <Input
+                id="item"
+                value={newExpense.item}
+                onChange={(e) => setNewExpense({ ...newExpense, item: e.target.value })}
+                placeholder="Item Name"
+                className="h-12"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="category" className="text-base font-medium">
+                Category:
+              </Label>
+              <Select
+                onValueChange={(value) => setNewExpense({ ...newExpense, category: value })}
+                value={newExpense.category}
+              >
+                <SelectTrigger className="h-12">
+                  <SelectValue placeholder="Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Food">Food</SelectItem>
+                  <SelectItem value="Furniture">Furniture</SelectItem>
+                  <SelectItem value="Accessory">Accessory</SelectItem>
+                  <SelectItem value="Toy">Toy</SelectItem>
+                  <SelectItem value="Healthcare">Healthcare</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="amount" className="text-base font-medium">
+                Amount:
+              </Label>
+              <Input
+                id="amount"
+                type="number"
+                value={newExpense.amount || ""}
+                onChange={(e) =>
+                  setNewExpense({ ...newExpense, amount: Number.parseFloat(e.target.value) || 0 })
+                }
+                placeholder="Item amount"
+                className="h-12"
+              />
+            </div>
+            <Button
+              onClick={handleAddExpense}
+              className="w-full mt-4 bg-purple-600 hover:bg-purple-700 h-12 text-base"
+            >
+              Submit
+            </Button>
+          </div>
+          <div className="bg-purple-50 p-4 rounded-lg flex flex-col justify-center">
+            <h3 className="text-purple-600 text-xl font-semibold mb-3">Random cat fact:</h3>
+            <p className="text-purple-600 text-lg leading-relaxed">{isLoading ? "Loading..." : catFact.fact}</p>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}

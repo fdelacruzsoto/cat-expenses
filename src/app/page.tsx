@@ -1,103 +1,89 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
+import { useState } from "react"
+import { Trash2, PawPrint } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Expense } from "@/types/expense"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import ExpensesDialog from "./components/ExpensesDialog"
+import ExpensesTable from "./components/ExpensesTable"
+
+const queryClient = new QueryClient()
+
+
+export default function ExpenseTracker() {
+  const [expenses, setExpenses] = useState<Expense[]>([
+    { id: "1", item: "Whiskers Cat food", category: "Food", amount: 10, selected: false },
+    { id: "2", item: "Self cleaning cat Litter box", category: "Furniture", amount: 500, selected: false },
+    { id: "3", item: "Diamond Cat collar", category: "Accessory", amount: 1000, selected: false },
+  ])
+
+  const [newExpense, setNewExpense] = useState<Omit<Expense, "id" | "selected">>({
+    item: "",
+    category: "",
+    amount: 0,
+  })
+
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+
+  const handleCheckboxChange = (id: string) => {
+    setExpenses(expenses.map((expense) => (expense.id === id ? { ...expense, selected: !expense.selected } : expense)))
+  }
+
+  const handleAddExpense = () => {
+    if (newExpense.item && newExpense.category && newExpense.amount > 0) {
+      const expense: Expense = {
+        id: Date.now().toString(),
+        ...newExpense,
+        selected: false,
+      }
+      setExpenses([...expenses, expense])
+      setNewExpense({ item: "", category: "", amount: 0 })
+      setIsAddDialogOpen(false)
+    }
+  }
+
+  const handleDeleteExpenses = () => {
+    setExpenses(expenses.filter((expense) => !expense.selected))
+  }
+
+  const totalAmount = expenses.reduce((sum, expense) => sum + expense.amount, 0)
+
+  const highestAmount = Math.max(...expenses.map((expense) => expense.amount), 0)
+  const isHighestExpense = (amount: number) => amount === highestAmount && highestAmount > 0
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <QueryClientProvider client={queryClient}>
+      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 p-4 md:p-8">
+        <Card className="max-w-4xl mx-auto shadow-lg border-none">
+          <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-t-lg">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-white flex items-center gap-2 text-2xl md:text-3xl">
+                <PawPrint className="h-8 w-8" />
+                Cat Expense Tracker
+              </CardTitle>
+              <p className="text-white font-medium">Total: ${totalAmount}</p>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="flex flex-col sm:flex-row gap-4 mb-8">
+              <ExpensesDialog isAddDialogOpen={isAddDialogOpen} setIsAddDialogOpen={setIsAddDialogOpen} newExpense={newExpense} setNewExpense={setNewExpense} handleAddExpense={handleAddExpense} />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+              <Button
+                variant="destructive"
+                onClick={handleDeleteExpenses}
+                disabled={!expenses.some((expense) => expense.selected)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" /> Delete Expense
+              </Button>
+            </div>
+
+            <ExpensesTable expenses={expenses} isHighestExpense={isHighestExpense} handleCheckboxChange={handleCheckboxChange} />
+          </CardContent>
+        </Card>
+      </div>
+    </QueryClientProvider>
+  )
 }
+
