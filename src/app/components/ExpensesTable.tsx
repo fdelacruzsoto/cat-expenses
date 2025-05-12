@@ -80,13 +80,13 @@ export default function ExpensesTable({ expenses, isHighestExpense, handleCheckb
 
   return (
     <div className="rounded-lg overflow-hidden border border-gray-200">
-      <table className="w-full">
+      <table className="table-auto w-full">
         <thead className="bg-gray-100">
           {table.getHeaderGroups().map(headerGroup => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map(header => {
                 return (
-                  <th key={header.id} colSpan={header.colSpan}>
+                  <th key={header.id} colSpan={header.colSpan} className="align-top">
                     {header.isPlaceholder ? null : (
                       <>
                         <div
@@ -107,7 +107,7 @@ export default function ExpensesTable({ expenses, isHighestExpense, handleCheckb
                           }[header.column.getIsSorted() as string] ?? null}
                         </div>
                         {header.column.getCanFilter() ? (
-                          <div>
+                          <div className="mx-2">
                             <Filter column={header.column} />
                           </div>
                         ) : null}
@@ -135,7 +135,7 @@ export default function ExpensesTable({ expenses, isHighestExpense, handleCheckb
               hover:bg-purple-50
             `} >
               {row.getVisibleCells().map(cell => (
-                <td key={cell.id} className="p-3">
+                <td key={cell.id} className="p-4">
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}

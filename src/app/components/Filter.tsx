@@ -1,12 +1,18 @@
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select } from "@/components/ui/select"
 import { Column } from "@tanstack/react-table"
 import { Search } from "lucide-react"
-import React from "react"
+import React, { useState } from "react"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function Filter({ column }: { column: Column<any, unknown> }) {
   const columnFilterValue = column.getFilterValue()
   const { filterVariant } = column.columnDef.meta ?? {}
+
+  // Little hack to force the select to reset when the filter is cleared
+  const [selectKey, setSelectKey] = useState<number>(Date.now())
 
   return filterVariant === 'range' ? (
     <div>
@@ -36,19 +42,30 @@ export function Filter({ column }: { column: Column<any, unknown> }) {
       <div className="h-1" />
     </div>
   ) : filterVariant === 'select' ? (
-    <select
-      onChange={e => column.setFilterValue(e.target.value)}
-      value={columnFilterValue?.toString()}
-    >
-      {/* See faceted column filters example for dynamic select options */}
-      <option value="">All</option>
-      <option value="Food">Food</option>
-      <option value="Furniture">Furniture</option>
-      <option value="Accessory">Accessory</option>
-      <option value="Toy">Toy</option>
-      <option value="Healthcare">Healthcare</option>
-      <option value="Other">Other</option>
-    </select>
+    <div>
+      <Select key={selectKey} value={columnFilterValue?.toString()} onValueChange={column.setFilterValue}>
+        <SelectTrigger className="h-10 text-sm bg-white">
+          <SelectValue placeholder="All" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="Food">Food</SelectItem>
+          <SelectItem value="Furniture">Furniture</SelectItem>
+          <SelectItem value="Accessory">Accessory</SelectItem>
+          <SelectItem value="Toy">Toy</SelectItem>
+          <SelectItem value="Healthcare">Healthcare</SelectItem>
+        </SelectContent>
+      </Select>
+      {columnFilterValue?.toString() && <Button
+        className="mt-2"
+        variant="ghost"
+        onClick={() => {
+          column.setFilterValue("")
+          setSelectKey(Date.now())
+        }}
+      >
+        Clear selection
+      </Button>}
+    </div>
   ) : (
     <DebouncedInput
       className="w-36 border shadow rounded"
@@ -93,7 +110,7 @@ function DebouncedInput({
       {showSearchIcon && <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />}
       <Input
         {...props} value={value} onChange={e => setValue(e.target.value)}
-        className="pl-9 h-10 text-sm"
+        className="pl-9 h-10 text-sm bg-white"
       />
     </div>
   )

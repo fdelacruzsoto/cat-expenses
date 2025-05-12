@@ -1,6 +1,6 @@
 "use client"
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,6 +36,7 @@ export default function ExpensesDialog({ isAddDialogOpen, setIsAddDialogOpen, ne
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold text-purple-700">Add New Expense</DialogTitle>
+          <DialogDescription>Add a new expense to the list</DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
           <div className="space-y-6">
@@ -49,6 +50,8 @@ export default function ExpensesDialog({ isAddDialogOpen, setIsAddDialogOpen, ne
                 onChange={(e) => setNewExpense({ ...newExpense, item: e.target.value })}
                 placeholder="Item Name"
                 className="h-12"
+                required
+                data-testid="item-input"
               />
             </div>
             <div className="grid gap-2">
@@ -58,17 +61,18 @@ export default function ExpensesDialog({ isAddDialogOpen, setIsAddDialogOpen, ne
               <Select
                 onValueChange={(value) => setNewExpense({ ...newExpense, category: value })}
                 value={newExpense.category}
+                required
               >
-                <SelectTrigger className="h-12">
+                <SelectTrigger className="h-12" data-testid="category-select">
                   <SelectValue placeholder="Category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Food">Food</SelectItem>
-                  <SelectItem value="Furniture">Furniture</SelectItem>
-                  <SelectItem value="Accessory">Accessory</SelectItem>
-                  <SelectItem value="Toy">Toy</SelectItem>
-                  <SelectItem value="Healthcare">Healthcare</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
+                  <SelectItem value="Food" data-testid="food-select-item">Food</SelectItem>
+                  <SelectItem value="Furniture" data-testid="furniture-select-item">Furniture</SelectItem>
+                  <SelectItem value="Accessory" data-testid="accessory-select-item">Accessory</SelectItem>
+                  <SelectItem value="Toy" data-testid="toy-select-item">Toy</SelectItem>
+                  <SelectItem value="Healthcare" data-testid="healthcare-select-item">Healthcare</SelectItem>
+                  <SelectItem value="Other" data-testid="other-select-item">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -85,11 +89,14 @@ export default function ExpensesDialog({ isAddDialogOpen, setIsAddDialogOpen, ne
                 }
                 placeholder="Item amount"
                 className="h-12"
+                required
+                data-testid="amount-input"
               />
             </div>
             <Button
               onClick={handleAddExpense}
               className="w-full mt-4 bg-purple-600 hover:bg-purple-700 h-12 text-base"
+              disabled={!newExpense.item || !newExpense.category || !newExpense.amount}
             >
               Submit
             </Button>
