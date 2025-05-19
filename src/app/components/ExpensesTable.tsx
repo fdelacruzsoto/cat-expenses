@@ -36,6 +36,8 @@ export default function ExpensesTable({
 }: ExpensesTableProps) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
 
+  console.log('columnFilters', columnFilters);
+
   const columns = [
     columnHelper.accessor('selected', {
       header: '',
