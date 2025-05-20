@@ -86,6 +86,7 @@ export default function ExpenseTracker() {
               />
 
               <Button
+                className="bg-gradient-to-r from-red-500 to-pink-500 text-white hover:brightness-110 transition-all"
                 variant="destructive"
                 onClick={handleDeleteExpenses}
                 disabled={!expenses.some((expense) => expense.selected)}
