@@ -17,13 +17,6 @@ export const DebouncedInput = React.memo(function DebouncedInput({
   const [localValue, setLocalValue] = React.useState(value);
 
   React.useEffect(() => {
-    // Only sync if prop actually changed
-    if (value !== localValue) {
-      setLocalValue(value);
-    }
-  }, [localValue, value]);
-
-  React.useEffect(() => {
     const timeout = setTimeout(() => {
       if (localValue !== value) {
         onChange(localValue);

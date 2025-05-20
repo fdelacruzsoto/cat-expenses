@@ -33,8 +33,8 @@ export default function ExpenseTracker() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const handleCheckboxChange = (id: string) => {
-    setExpenses(
-      expenses.map((expense) =>
+    setExpenses((prevExpenses) =>
+      prevExpenses.map((expense) =>
         expense.id === id ? { ...expense, selected: !expense.selected } : expense,
       ),
     );
@@ -47,14 +47,14 @@ export default function ExpenseTracker() {
         ...newExpense,
         selected: false,
       };
-      setExpenses([...expenses, expense]);
+      setExpenses((prevExpenses) => [...prevExpenses, expense]);
       setNewExpense({ item: '', category: '', amount: 0 });
       setIsAddDialogOpen(false);
     }
   };
 
   const handleDeleteExpenses = () => {
-    setExpenses(expenses.filter((expense) => !expense.selected));
+    setExpenses((prevExpenses) => prevExpenses.filter((expense) => !expense.selected));
   };
 
   const totalAmount = expenses.reduce((sum, expense) => sum + expense.amount, 0);
