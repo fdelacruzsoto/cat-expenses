@@ -16,6 +16,7 @@ import { Filter } from './Filter';
 interface ExpensesTableProps {
   expenses: Expense[];
   isHighestExpense: (amount: number) => boolean;
+  isHighestCategory: (category: string) => boolean;
   handleCheckboxChange: (id: string) => void;
 }
 
@@ -32,6 +33,7 @@ declare module '@tanstack/react-table' {
 export default function ExpensesTable({
   expenses,
   isHighestExpense,
+  isHighestCategory,
   handleCheckboxChange,
 }: ExpensesTableProps) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -146,7 +148,7 @@ export default function ExpensesTable({
             <tr
               key={row.id}
               className={`border-t border-gray-200 ${
-                isHighestExpense(row.original.amount)
+                isHighestCategory(row.original.category)
                   ? 'border-l-4 border-l-amber-400 bg-amber-50'
                   : row.original.selected
                     ? 'bg-purple-100'

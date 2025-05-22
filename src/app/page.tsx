@@ -32,6 +32,7 @@ export default function ExpenseTracker() {
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
+  // TODO: Memoize this function
   const handleCheckboxChange = (id: string) => {
     setExpenses((prevExpenses) =>
       prevExpenses.map((expense) =>
@@ -40,6 +41,7 @@ export default function ExpenseTracker() {
     );
   };
 
+  // TODO: Memoize this function
   const handleAddExpense = () => {
     if (newExpense.item && newExpense.category && newExpense.amount > 0) {
       const expense: Expense = {
@@ -53,14 +55,35 @@ export default function ExpenseTracker() {
     }
   };
 
+  // TODO: Memoize this function
   const handleDeleteExpenses = () => {
     setExpenses((prevExpenses) => prevExpenses.filter((expense) => !expense.selected));
   };
 
+  const CATEGORIES = ['Food', 'Furniture', 'Accessory', 'Toy', 'Healthcare', 'Other'];
+
   const totalAmount = expenses.reduce((sum, expense) => sum + expense.amount, 0);
 
   const highestAmount = Math.max(...expenses.map((expense) => expense.amount), 0);
+
+  // TODO: Memoize this function
+  const highestCategoryAmount = CATEGORIES.map((category) => {
+    const categoryExpenses = expenses.filter((expense) => expense.category === category);
+    return {
+      category,
+      amount: categoryExpenses.reduce((sum, expense) => sum + expense.amount, 0),
+    };
+  });
+
+  // TODO: Memoize this function
   const isHighestExpense = (amount: number) => amount === highestAmount && highestAmount > 0;
+
+  const highestCategory = highestCategoryAmount.reduce((max, current) =>
+    max.amount > current.amount ? max : current,
+  );
+
+  // TODO: Memoize this function
+  const isHighestCategory = (category: string) => category === highestCategory.category;
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -98,6 +121,7 @@ export default function ExpenseTracker() {
             <ExpensesTable
               expenses={expenses}
               isHighestExpense={isHighestExpense}
+              isHighestCategory={isHighestCategory}
               handleCheckboxChange={handleCheckboxChange}
             />
           </CardContent>
