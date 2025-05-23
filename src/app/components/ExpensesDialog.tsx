@@ -36,6 +36,7 @@ export default function ExpensesDialog({
   setNewExpense,
   handleAddExpense,
 }: ExpensesDialogProps) {
+  // TODO: Probably should use a custom hook for this or move it to be server side (RSC)
   const {
     data: catFact,
     isLoading,

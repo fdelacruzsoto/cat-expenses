@@ -32,14 +32,16 @@ export default function ExpenseTracker() {
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
+  // TODO: Memoize this function
   const handleCheckboxChange = (id: string) => {
-    setExpenses(
-      expenses.map((expense) =>
+    setExpenses((prevExpenses) =>
+      prevExpenses.map((expense) =>
         expense.id === id ? { ...expense, selected: !expense.selected } : expense,
       ),
     );
   };
 
+  // TODO: Memoize this function
   const handleAddExpense = () => {
     if (newExpense.item && newExpense.category && newExpense.amount > 0) {
       const expense: Expense = {
@@ -47,20 +49,41 @@ export default function ExpenseTracker() {
         ...newExpense,
         selected: false,
       };
-      setExpenses([...expenses, expense]);
+      setExpenses((prevExpenses) => [...prevExpenses, expense]);
       setNewExpense({ item: '', category: '', amount: 0 });
       setIsAddDialogOpen(false);
     }
   };
 
+  // TODO: Memoize this function
   const handleDeleteExpenses = () => {
-    setExpenses(expenses.filter((expense) => !expense.selected));
+    setExpenses((prevExpenses) => prevExpenses.filter((expense) => !expense.selected));
   };
+
+  const CATEGORIES = ['Food', 'Furniture', 'Accessory', 'Toy', 'Healthcare', 'Other'];
 
   const totalAmount = expenses.reduce((sum, expense) => sum + expense.amount, 0);
 
   const highestAmount = Math.max(...expenses.map((expense) => expense.amount), 0);
+
+  // TODO: Memoize this function
+  const highestCategoryAmount = CATEGORIES.map((category) => {
+    const categoryExpenses = expenses.filter((expense) => expense.category === category);
+    return {
+      category,
+      amount: categoryExpenses.reduce((sum, expense) => sum + expense.amount, 0),
+    };
+  });
+
+  // TODO: Memoize this function
   const isHighestExpense = (amount: number) => amount === highestAmount && highestAmount > 0;
+
+  const highestCategory = highestCategoryAmount.reduce((max, current) =>
+    max.amount > current.amount ? max : current,
+  );
+
+  // TODO: Memoize this function
+  const isHighestCategory = (category: string) => category === highestCategory.category;
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -86,6 +109,7 @@ export default function ExpenseTracker() {
               />
 
               <Button
+                className="bg-gradient-to-r from-red-500 to-pink-500 text-white hover:brightness-110 transition-all"
                 variant="destructive"
                 onClick={handleDeleteExpenses}
                 disabled={!expenses.some((expense) => expense.selected)}
@@ -97,6 +121,7 @@ export default function ExpenseTracker() {
             <ExpensesTable
               expenses={expenses}
               isHighestExpense={isHighestExpense}
+              isHighestCategory={isHighestCategory}
               handleCheckboxChange={handleCheckboxChange}
             />
           </CardContent>

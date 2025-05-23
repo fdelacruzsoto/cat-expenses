@@ -1,41 +1,54 @@
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Select } from '@/components/ui/select';
+import React, { useCallback, useState } from 'react';
+import { DebouncedInput } from './DebouncedInput';
 import { Column } from '@tanstack/react-table';
-import { Search } from 'lucide-react';
-import React, { useState } from 'react';
+import { Select, SelectValue, SelectTrigger, SelectContent, SelectItem } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function Filter({ column }: { column: Column<any, unknown> }) {
+export const Filter = React.memo(function Filter({ column }: { column: Column<any, unknown> }) {
   const columnFilterValue = column.getFilterValue();
   const { filterVariant } = column.columnDef.meta ?? {};
-
-  // Little hack to force the select to reset when the filter is cleared
   const [selectKey, setSelectKey] = useState<number>(Date.now());
 
+  const handleTextChange = useCallback(
+    (value: string | number) => {
+      if (column.getFilterValue() !== value) {
+        column.setFilterValue(value);
+      }
+    },
+    [column]
+  );
+
+  const handleMinChange = useCallback(
+    (value: string | number) =>
+      column.setFilterValue((old: [number, number]) => [value, old?.[1]]),
+    [column]
+  );
+
+  const handleMaxChange = useCallback(
+    (value: string | number) =>
+      column.setFilterValue((old: [number, number]) => [old?.[0], value]),
+    [column]
+  );
+
   return filterVariant === 'range' ? (
-    <div>
-      <div className="flex space-x-2">
-        {/* See faceted column filters example for min max values functionality */}
-        <DebouncedInput
-          type="number"
-          value={(columnFilterValue as [number, number])?.[0] ?? ''}
-          onChange={(value) => column.setFilterValue((old: [number, number]) => [value, old?.[1]])}
-          placeholder={`Min`}
-          className="w-24 rounded border shadow"
-          showSearchIcon={false}
-        />
-        <DebouncedInput
-          type="number"
-          value={(columnFilterValue as [number, number])?.[1] ?? ''}
-          onChange={(value) => column.setFilterValue((old: [number, number]) => [old?.[0], value])}
-          placeholder={`Max`}
-          className="w-24 rounded border shadow"
-          showSearchIcon={false}
-        />
-      </div>
-      <div className="h-1" />
+    <div className="flex space-x-2">
+      <DebouncedInput
+        type="number"
+        value={(columnFilterValue as [number, number])?.[0] ?? ''}
+        onChange={handleMinChange}
+        placeholder="Min"
+        className="w-24"
+        showSearchIcon={false}
+      />
+      <DebouncedInput
+        type="number"
+        value={(columnFilterValue as [number, number])?.[1] ?? ''}
+        onChange={handleMaxChange}
+        placeholder="Max"
+        className="w-24"
+        showSearchIcon={false}
+      />
     </div>
   ) : filterVariant === 'select' ? (
     <div>
@@ -70,54 +83,9 @@ export function Filter({ column }: { column: Column<any, unknown> }) {
     </div>
   ) : (
     <DebouncedInput
-      className="w-36 rounded border shadow"
-      onChange={(value) => column.setFilterValue(value)}
-      placeholder={`Search...`}
-      type="text"
       value={(columnFilterValue ?? '') as string}
+      onChange={handleTextChange}
+      placeholder="Search..."
     />
-    // See faceted column filters example for datalist search suggestions
   );
-}
-
-// A typical debounced input react component
-function DebouncedInput({
-  value: initialValue,
-  onChange,
-  debounce = 500,
-  showSearchIcon = true,
-  ...props
-}: {
-  value: string | number;
-  onChange: (value: string | number) => void;
-  debounce?: number;
-  showSearchIcon?: boolean;
-} & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'>) {
-  const [value, setValue] = React.useState(initialValue);
-
-  React.useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
-
-  React.useEffect(() => {
-    const timeout = setTimeout(() => {
-      onChange(value);
-    }, debounce);
-
-    return () => clearTimeout(timeout);
-  }, [debounce, onChange, value]);
-
-  return (
-    <div className="relative">
-      {showSearchIcon && (
-        <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
-      )}
-      <Input
-        {...props}
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        className="h-10 bg-white pl-9 text-sm"
-      />
-    </div>
-  );
-}
+});
